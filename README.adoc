@@ -39,7 +39,7 @@ Critical ASCIIDoctor FX detriments include:
 * It is a work in progress and continues to have growing pains, which translates into application failures at inappropriate times
 * It does not have a spelling checker
 
-Installation Environment
+== Installation Environment
 
 The ASCY-Now installation environment is a Blue host server able to host either Ruby or PHP applications. Future iterations of ASCY-Now will include a SQLite database to hold backups, snippets, and security access. Please note, the MVP version will not contain any database features.
 
@@ -48,13 +48,13 @@ ASCY-Now works directly with the file system on the Bluehost server; this should
 * ASCYNow – Web application directory
 * Courses – Content directory (can further define within the application)
 
-Content Available Openly
+== Content Available Openly
 
 The ASCY-Now application can be installed in multiple directories on the same server; this allows users/user groups to be isolated to a specific area. The content directory is accessible openly on the internet via a standard URL such as http://pwc-lms.com/Courses/ASCY-Now-MVP.
 
 Web Site Directory Structure
 
-image::images/WebSite_Directory_Structure.png[]
+image::images/WebSiteDirectoryStructure.png[]
 
 Wireframe
 
@@ -66,11 +66,11 @@ image::images/ASKY-NOW_Edit.png[]
 * Editing pane
 * Viewing pane
 
-Directory/File Pane
+== Directory/File Pane
 
 The Directory/File pane displays actual Linux server File system files for the START directory (as indicated in the setup). In this instance, the START directory is titled ‘Courses’. Users need standard file system management capabilities for any directory or file housed in the START directory.
 
-File Management Functions
+=== File Management Functions
 
 File management functions are accessed through right-click functionality.
 
@@ -82,7 +82,7 @@ File management functions are accessed through right-click functionality.
 
 NOTE: Creating a new first tier directory (directly under the START directory) is accomplished using the New Directory button located in the Directory/File pane header.
 
-Editing Pane
+=== Editing Pane
 
 The Editing pane presents the ADOC file currently being edited; in the header, the directory name and ADOC file name provide confirmation. The Editing pane includes word-wrap functionality, eliminating the need for left-right scrolling. The HTML viewing pane simultaneously updates as edits occur in the Editing pane.
 
@@ -97,15 +97,15 @@ Standard Copy-Paste keyboard functionality works. The user can:
 * Press Ctrl+V to paste
 * Press Ctrl+X to cut
 
-New ADOC Files
+=== New ADOC Files
 
 New ADOC files are created using the New button in the Editing pane header. A dialog box displays, prompting the user to name the new file. The file extension always defaults to ADOC; therefore, avoid entering ‘ADOC’ in the file name. If including ‘ADOC’, the file will be named NewFile.ADOC.ADOC.
 
-Viewing Pane
+=== Viewing Pane
 
 The Viewing pane displays the current HTML version of the ADOC file, with the HTML content wrapped; no left-right scrolling is permitted. However, as the user scrolls vertically within the Viewing pane the Editing pane moves in sync.
 
-Images
+=== Images
 
 Images are a significant part of the document-creation process. The ability to insert an image into an ADOC file must be intuitive and simple.
 
