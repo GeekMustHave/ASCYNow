@@ -1,0 +1,501 @@
+
+<div class="col-md-2 three-panel">
+  
+  <!-- Nav Bar Assets Panel -->
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <div class="navbar-brand">Assets Panel </div>
+        <div class="navbar-right loading" style="font-size:20px;">
+          <span class="navbar-text glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <!-- JSTree Component -->
+
+  <%= form_tag "/workspace/upload", :class=>"dropzone", :id=> "my-awesome-dropzone" do %>
+    <div id='assetTreeCont'>
+      <div id="assetTree" class="jstree-scroll">
+          
+        <!-- call ruby function which returns this ul li structure, function will take path -->
+          <ul>
+               <li>Individual<%= mk_content("public/Individual").html_safe%>
+                </li>
+                <li>Group1<%= mk_content("public/Group1").html_safe%>
+                </li>
+                <li>Group2<%= mk_content("public/Group2").html_safe%>
+                </li>
+          </ul>
+        </div>
+        <div class="dz-message needsclick" style="margin-top:20px;">
+        Click here OR Drag and Drop files in Assets Panel above to upload images from your computer<br />
+      </div>
+    </div>
+  <% end %>
+</div>
+
+
+
+
+<div class="col-md-5 three-panel">
+  
+  <!-- Nav Bar Assets Panel -->
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <div class="navbar-brand">
+        	Editor Panel        
+        </div>
+      </div>
+
+      <form class="navbar-right">
+  		  <button class='btn navbar-btn' id = 'save'>Save!</button>
+        <button class='btn navbar-btn' id = 'new' >New File</button>
+			</form>
+
+    </div>
+  </nav>
+
+  <!-- Text Area -->
+
+  <%= text_area_tag :acontent, 'Welcome To ASCIIDoctor', :style=>"width:100%;height:500px;"%>
+
+</div>
+
+
+
+<div class="col-md-5 three-panel">
+
+  <!-- Nav Bar Assets Panel -->
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+
+        <div class="navbar-brand">Preview Panel
+        </div>
+      </div>
+    </div>
+  </nav>
+   <div id ='value' >
+    <iframe id ='iframe' width="100%" height="500px" src="/preview.html">
+     </iframe>               
+   </div>
+</div>
+<script>
+
+  $(document).ready(function(){
+
+    $('.loading').hide();
+
+    needToSave = false;
+    path = '';
+    saved=true;
+    old_file_path = ''
+    items = $.jstree.defaults.contextmenu.items();
+    items.create.label="Create Folder";
+    items.create_file = new String(items.create);
+    items.create_file.label="Create File";
+    items = {
+    	create:items.create,
+    	create_file:items.create_file,
+    	rename:items.rename,
+    	remove:items.remove,
+    	ccp:items.ccp
+    };
+
+    console.log('init dropzone');
+    // The recommended way from within the init configuration:
+    Dropzone.options.myAwesomeDropzone= {
+      init: function() {
+        console.log('in init');
+        this.on("sending", function(file, xhr, formData) {
+          // Will send the filesize along with the file as POST data.
+          root = path.split('/')[0];
+          formData.append("root_path", root);
+          console.log('in handkler');
+          $('.loading').show();
+
+        });
+      
+        //  bind an event for complete and create a node in root
+        this.on('success',function(event,data){
+          console.log(data);
+          $('.loading').hide();
+          ref = $('#assetTree').jstree(true);
+          var root_node_text = data.path.split('/')[0];
+          var node_text = data.path.split('/')[data.path.split('/').length-1];
+          var images_node_id = $("li:contains('"+root_node_text+"')").find("li[aria-level=2] a:contains('images')").parent().attr('id');
+          console.log(images_node_id);
+          var node = ref.create_node(images_node_id,{text:node_text,"icon" : data.path},"last",function(){},true);
+          node = ref.get_node(node);
+          console.log(node);
+          $('#'+node.id).addClass('file');
+          $('#'+node.id).attr('ipath',data.path);
+        });
+      }
+
+    };
+
+    items.create_file.action=function(b){
+    	$('#new').click();
+    }
+
+    $('#assetTree').jstree({
+      "core" : {
+                      "animation" : 0,
+                      "check_callback" : true,
+                      'force_text' : true,
+                      "themes" : { "stripes" : false },
+                },
+
+      "types" : {
+                      "#" : { "max_children" : 1, "max_depth" : 4, "valid_children" : ["root"] },
+                      "root" : { "icon" : "/static/3.2.1/assets/images/tree_icon.png", "valid_children" : ["default"] },
+                      "default" : { "valid_children" : ["default","file"] },
+                      "file" : { "icon" : "glyphicon glyphicon-file", "valid_children" : [] }
+                    },
+
+      "plugins" : [ 
+              "contextmenu", 
+              // "dnd", 
+              "search", 
+              "state", 
+              "types", 
+              "wholerow" 
+              ],
+      "contextmenu": {
+        "items": items
+      }
+
+    });    
+
+
+    $('#acontent').scroll(function() {
+      // console.log($(this).scrollTop());
+      $('iframe').contents().scrollTop($(this).scrollTop());
+    });
+
+    $(window).load(function(){
+      $($('iframe').contents()).scroll(function() {
+        console.log($(this).scrollTop());
+        $('#acontent').scrollTop($(this).scrollTop());
+      });
+    });
+
+    // image preview function call
+    $('#assetTree').mouseover(function(){
+      // console.log('in mouse over');
+
+      $("#assetTree li[ipath]").imgPreview({
+        srcAttr:'ipath',
+        imgCSS: {
+          width: '300px'
+        }
+      });
+    });
+    
+    // image preview function call
+    $('#assetTree').mouseout(function(){
+      // console.log('in mouse over');
+
+      while($('#imgPreviewContainer').length > 0) $('#imgPreviewContainer').remove();
+    
+    });
+    
+    window.onbeforeunload = confirmExit;
+    function confirmExit() {
+      if (!saved) {
+        return "You did not save, do you want to do it now?";
+      }
+    }
+
+     // Set this to true on some change
+    // listen on all <a ...> clicks
+    $('#assetTree li').click(function(event){ 
+      $(window).trigger("unload");
+
+      if (needToSave == true) {
+        needToSave = false;
+        //console.log("function:   "+ needToSave)
+        result=confirm("Press OK to save first!");
+        if(result)
+        {
+          //  needToSave == false;
+          return false;
+        }   
+      }
+    });
+    
+
+    $('#assetTree').on('changed.jstree', function (e, data) {
+      c_data = $('#acontent').val();
+      if(data.action!= 'deselect_all')
+      {
+        path  = data.instance.get_path(data.node,'/');
+      }
+
+      
+      if(path.indexOf('.adoc') != -1)
+      { 
+        needToSave == false;
+        //console.log('adasdsad:'+needToSave);
+        $("#acontent").val('Loading...')//.trigger('keyup');
+        jQuery.get('/workspace/get_file',{ file_path: path }, function(data) {
+         $("#acontent").val(data)
+          iframe();
+        });
+      } 
+
+    });
+  
+     //cut event handler
+    $('#assetTree').on('cut.jstree',function(e,data){
+      old_file_path=data.instance.get_path(data.node,'/');
+    });
+    //copy event handler
+    $('#assetTree').on('copy.jstree',function(e,data){
+      old_file_path=data.instance.get_path(data.node,'/');
+      console.log(old_file_path);
+      // console.log("copy_path: "+path);
+    });
+    //past event handler 
+    $('#assetTree').on('paste.jstree',function(e,data){
+      console.log(data);
+      // return;
+      new_file_path=data.instance.get_path(data.parent,'/');
+      //console.log("new_path:"+new_file_path);
+      //console.log("old_path: "+old_file_path);
+      //console.log(data.mode);
+      jQuery.get('/workspace/cut_file',{ old_file_path: old_file_path, new_file_path: new_file_path ,data_mode: data.mode }, function(data) {  
+                  old_file_path = '';
+                 //alert(data);
+      });
+    });
+    
+    // create event handler for jsTree
+    $('#assetTree').on('create_node.jstree',function(e,data){
+      console.log(e);
+      console.log(data);
+
+      // console.log(path);
+
+      //file_name = 'new_file'+parseInt(Math.random()*100)+'.adoc';
+      console.log($('#'+data.node.id+'[ipath]'));
+      if(data.node.text.indexOf('.adoc')==-1){
+        console.log('skipping create file for image');
+        return;
+      }
+
+      var file_name = data.node.text;
+      create_node_on_server(path,file_name);
+      data.instance.select_node(data.node);
+      data.instance.edit(data.node),file_name;
+    });
+   
+
+    // rename event handler for jsTree
+    $('#assetTree').on('rename_node.jstree',function(e,data){
+      // console.log(e);
+      // console.log(data.text);
+      // console.log(data.old);
+
+      if(data.text == data.old){
+        console.log('skipping rename due to same name');
+        return;
+      }
+
+      path = data.instance.get_path(data.node,'/');
+      //console.log(path);
+
+
+      //alert(path + data.text + data.old + e);
+      $.post("/workspace/rename_file",{file_path: path, new_name: data.text,old_name: data.old}, function(data, status){
+      });
+
+    });    
+    
+    // delete node handler
+    $('#assetTree').on('delete_node.jstree',function(e,data){
+      // console.log(e);
+      // console.log(data);
+      // console.log(path);
+      e.preventDefault;
+      path = data.instance.get_path(data.node,'/');
+      name=data.node.text
+      if(name !='Individual'&&name!='Group1'&&name!='Group2')
+      {
+        $.post("/workspace/delete_file",{file_path: path}, function(data, status){
+          console.log('file removed');
+          $('acontent').val('Welcome To ASCIIDoctor');
+           //$('#iframe').contents().find('body').html('Welcome To ASCIIDoctor' ,header_footer => true);  
+           $('#iframe').contents().html('Welcome To ASCIIDoctor' ,header_footer => true);
+        });  
+
+      }    
+    });
+    c_html = ''
+    function iframe ()
+    {
+      var content = $("#acontent").val();
+      var options = Opal.hash2(['header_footer', 'attributes'], { 'header_footer': true, 'attributes': ['icons=font'] }); 
+
+            c_html = Opal.Asciidoctor.$convert(content,options);
+
+            // $("#value").html(html);
+            $('#iframe').contents().find('body').html(c_html);    
+             // console.log(c_html);
+
+    }
+   //Contvert html
+    $("#acontent").keyup(function(){
+            saved = false;
+            needToSave = true;
+            console.log(needToSave);
+            iframe();
+    });
+   iframe();
+   function save()
+   {
+    var key =$("#acontent").val();
+      saved=true;
+      needToSave = false;
+     // console.log (path);
+      $.post("/workspace/save_file",{file_path: path , new_content: key}, function(data, status){
+        alert ("Saved Successfully ");
+      });
+   }
+    //save contents
+    $("#save").click(function(event){
+      save();
+
+      event.preventDefault();
+      
+    });
+     $(document).bind('keydown', function(e) {
+
+      if(e.ctrlKey && (e.which == 83)) {
+        e.preventDefault();
+        if(path.indexOf('.adoc') != -1)
+        {
+          save();
+        }
+        return false;
+      }
+    });
+    $('#fname').hide();
+    
+    // new button handler
+    $("#new").click(function(event){
+    	event.preventDefault();
+
+      ref = $('#assetTree').jstree(true);
+      sel = ref.get_selected();
+      parent = ref.get_node(sel);
+      console.log("sel"+sel);
+      if(sel == '' || sel == null)
+      {
+        alert('Please select folder Where you create new file');
+      }
+      // return if parent is a file
+      if(parent.text.indexOf('.adoc')!=-1){
+        alert("Can't create file here");
+        return;
+      }
+      
+      name ='new_file'+parseInt(Math.random()*100)+'.adoc'
+      node = ref.create_node(parent,{text:name,"icon" : "doc.png"},"last",function(){},true);
+
+    });
+
+    function create_node_on_server(file_path,file_name){
+      $.post("/workspace/create_file",{file_path: path,file_name}, function(data, status){
+       // console.log('data13233 created');
+       // alert('created');
+      });
+    }
+
+    // $(".draggie").draggable({
+    //   containment: "parent",
+    //   cursor: "move",
+    //   revert: true,
+    //   revertDuration: 100
+    // });
+    
+    // var targetName;
+    
+    // $(".draggie").mousedown(function(){
+    //   targetName = $(this).attr("data-twimage");
+    // });
+    
+    // $("#acontent").droppable({
+    //   // accept: ".draggie",
+    //   drop: function(event) {
+    //     console.log('called');
+    //     event.preventDefault();  
+    //   }   
+    // });
+  
+
+    // document.getElementById('img').addEventListener('dragstart', function (e) {
+    $('#assetTree').on('dragstart','.jstree-node a',function(e){
+      console.log(e);
+      console.log('dragstart');
+
+      if($(this).parent().hasClass('file'))
+        e.originalEvent.dataTransfer.setData("text", 'image::' + $(this).parent().attr('ipath')+'[]');
+      else
+        e.preventDefault();
+      end
+
+    });
+
+    $('#acontent').on('drop',function(event){
+      console.log(event);
+      // console.log(data);
+
+      console.log('dropped');
+      // console.log(event.originalEvent.dataTransfer.getData('text'));
+      // console.log(event.originalEvent.dataTransfer.getData('text/html'));
+      
+      // event.originalEvent.dataTransfer.clearData('text/uri-list');
+      // event.originalEvent.dataTransfer.clearData('text/plain');
+      // event.originalEvent.dataTransfer.clearData('text/html');
+      
+      // console.log(event.originalEvent.dataTransfer.items);
+      // event.originalEvent.dataTransfer.items.clear();      
+      // event.originalEvent.dataTransfer.setData("text/uri-list","dropped_here");
+      // event.originalEvent.dataTransfer.setData("text/html","dropped_here");
+      // event.originalEvent.dataTransfer.setData("text/plain",'dropped_here');
+      
+      // console.log(event.originalEvent.dataTransfer.getData('text/uri-list'));
+      // console.log(event.originalEvent.dataTransfer.getData('text/plain'));
+      // console.log(event.originalEvent.dataTransfer.getData('text/html'));
+
+      setTimeout("$('#acontent').trigger('keyup');",1000);
+
+      // $(this).focus();
+
+      // event.data='ereere';
+      // typeInTextarea($('#acontent'),path);
+      // event.stopPropagation();
+      // event.preventDefault();
+    });
+
+
+
+    function typeInTextarea(el, newText) {
+      var start = el.prop("selectionStart")
+      var end = el.prop("selectionEnd")
+      var text = el.val()
+      var before = text.substring(0, start)
+      var after  = text.substring(end, text.length)
+      el.val(before + newText + after)
+      el[0].selectionStart = el[0].selectionEnd = start + newText.length
+      el.focus()
+    }
+
+
+  });
+
+</script>

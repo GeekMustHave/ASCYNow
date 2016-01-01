@@ -1,0 +1,23 @@
+.container{
+	width: 100%;
+}
+.main-header .dropdown-menu{
+	left: 10px;
+	top: 32px;}
+	.content-area{
+		padding-bottom: 40px;
+	}
+	.navbar-brand a{color: #777;}
+	.navbar-brand:hover .dropdown-menu{
+		display: block;
+	}
+	@media only screen and (max-width:768px){
+		.container{
+			width: 96%;
+		}
+	}
+
+.three-panel {
+  padding-left: 2px;
+  padding-right: 2px;
+}
